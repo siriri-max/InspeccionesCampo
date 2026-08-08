@@ -2,6 +2,7 @@ package com.ucenm.inspeccionescampo;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.media.MediaRecorder;
@@ -14,7 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.media.MediaPlayer;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -25,6 +25,11 @@ import com.google.android.gms.location.LocationServices;
 
 import java.io.File;
 import java.io.IOException;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class FormularioActivity extends AppCompatActivity {
 
@@ -51,7 +56,6 @@ public class FormularioActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formulario);
 
-        // Inicializar componentes
         edtTitulo = findViewById(R.id.edtTitulo);
         edtDescripcion = findViewById(R.id.edtDescripcion);
         imgPreview = findViewById(R.id.imgPreview);
@@ -65,10 +69,8 @@ public class FormularioActivity extends AppCompatActivity {
 
         solicitarPermisos();
 
-        // Botón Cámara
         btnFoto.setOnClickListener(v -> abrirCamara());
 
-        // Botón Grabadora
         btnGrabarAudio.setOnClickListener(v -> {
             if (isRecording) {
                 detenerGrabacion();
@@ -77,10 +79,8 @@ public class FormularioActivity extends AppCompatActivity {
             }
         });
 
-        // Botón Ubicación GPS
         btnUbicacion.setOnClickListener(v -> obtenerUbicacionGPS());
 
-        // Botón Guardar
         btnGuardar.setOnClickListener(v -> guardarInspeccion());
     }
 
@@ -177,20 +177,37 @@ public class FormularioActivity extends AppCompatActivity {
             return;
         }
 
-        // Crear el objeto inspección
-        Inspeccion nuevaInspeccion = new Inspeccion(titulo, descripcion, "foto_ruta", rutaAudio, latitud, longitud);
+        SharedPreferences prefs = getSharedPreferences("sesion", MODE_PRIVATE);
+        int usuarioId = prefs.getInt("usuario_id", 1);
 
-        // Guardar en la base de datos SQLite
-        DatabaseHelper dbHelper = new DatabaseHelper(this);
-        boolean insertado = dbHelper.insertarInspeccion(nuevaInspeccion);
+        Inspeccion nuevaInspeccion = new Inspeccion();
+        nuevaInspeccion.setUsuarioId(usuarioId);
+        nuevaInspeccion.setTitulo(titulo);
+        nuevaInspeccion.setDescripcion(descripcion);
+        nuevaInspeccion.setLatitud(latitud);
+        nuevaInspeccion.setLongitud(longitud);
 
-        if (insertado) {
-            Toast.makeText(this, "¡Inspección guardada exitosamente en BD!", Toast.LENGTH_LONG).show();
-            finish(); // Regresa a la pantalla principal
-        } else {
-            Toast.makeText(this, "Error al guardar en la base de datos", Toast.LENGTH_SHORT).show();
-        }
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
+        Call<ResponseBody> call = apiService.crearInspeccion(nuevaInspeccion);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(FormularioActivity.this, "¡Inspección guardada en MySQL!", Toast.LENGTH_LONG).show();
+                    finish();
+                } else {
+                    Toast.makeText(FormularioActivity.this, "Error al guardar en el servidor", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(FormularioActivity.this, "Fallo de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
+
     private void reproducirAudio() {
         if (rutaAudio != null && !rutaAudio.isEmpty()) {
             MediaPlayer mediaPlayer = new MediaPlayer();

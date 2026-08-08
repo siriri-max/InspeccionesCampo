@@ -1,6 +1,7 @@
 package com.ucenm.inspeccionescampo;
 
 public class Inspeccion {
+    private int usuarioId; // Nuevo campo agregado
     private String titulo;
     private String descripcion;
     private String rutaFoto;
@@ -8,7 +9,11 @@ public class Inspeccion {
     private double latitud;
     private double longitud;
 
-    // Constructor
+    // 1. Constructor vacío (NECESARIO para usar new Inspeccion())
+    public Inspeccion() {
+    }
+
+    // 2. Constructor completo
     public Inspeccion(String titulo, String descripcion, String rutaFoto, String rutaAudio, double latitud, double longitud) {
         this.titulo = titulo;
         this.descripcion = descripcion;
@@ -18,7 +23,10 @@ public class Inspeccion {
         this.longitud = longitud;
     }
 
-    // Getters y Setters
+    // 3. Getters y Setters
+    public int getUsuarioId() { return usuarioId; }
+    public void setUsuarioId(int usuarioId) { this.usuarioId = usuarioId; }
+
     public String getTitulo() { return titulo; }
     public void setTitulo(String titulo) { this.titulo = titulo; }
 

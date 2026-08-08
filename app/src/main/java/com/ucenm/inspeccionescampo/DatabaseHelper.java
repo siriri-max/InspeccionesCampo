@@ -46,14 +46,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Método para insertar una nueva inspección
+    // Metodo para insertar una nueva inspección
     public boolean insertarInspeccion(Inspeccion inspeccion) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_TITULO, inspeccion.getTitulo());
         values.put(COLUMN_DESCRIPCION, inspeccion.getDescripcion());
-        values.put(COLUMN_RUTA_FOTO, inspeccion.getRutaFoto());
-        values.put(COLUMN_RUTA_AUDIO, inspeccion.getRutaAudio());
+        values.put(COLUMN_RUTA_FOTO, inspeccion.getRuta_foto());   // <-- Actualizado
+        values.put(COLUMN_RUTA_AUDIO, inspeccion.getRuta_audio()); // <-- Actualizado
         values.put(COLUMN_LATITUD, inspeccion.getLatitud());
         values.put(COLUMN_LONGITUD, inspeccion.getLongitud());
 
@@ -62,7 +62,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result != -1;
     }
 
-    // Método para obtener todas las inspecciones guardadas
+    // Metodo para obtener todas las inspecciones guardadas
     public List<Inspeccion> obtenerTodasInspecciones() {
         List<Inspeccion> lista = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -77,12 +77,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 double lat = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_LATITUD));
                 double lng = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_LONGITUD));
 
-                // Usamos el constructor vacío y los setters para evitar conflictos de parámetros
+                // Usamos el constructor vacío y los setters actualizados
                 Inspeccion insp = new Inspeccion();
                 insp.setTitulo(titulo);
                 insp.setDescripcion(descripcion);
-                insp.setRutaFoto(foto);
-                insp.setRutaAudio(audio);
+                insp.setRuta_foto(foto);   // <-- Actualizado
+                insp.setRuta_audio(audio); // <-- Actualizado
                 insp.setLatitud(lat);
                 insp.setLongitud(lng);
 

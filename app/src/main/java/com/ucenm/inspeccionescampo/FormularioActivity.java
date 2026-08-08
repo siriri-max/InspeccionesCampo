@@ -188,21 +188,23 @@ public class FormularioActivity extends AppCompatActivity {
         nuevaInspeccion.setFechaInspeccion(fechaActual);
         nuevaInspeccion.setLatitud(latitud);
         nuevaInspeccion.setLongitud(longitud);
-        nuevaInspeccion.setRuta_foto(fotoBitmap != null ? "foto_pendiente.jpg" : "");
-        nuevaInspeccion.setRuta_audio(!rutaAudio.isEmpty() ? "audio_pendiente.3gp" : "");
+
+        // Nombres temporales o vacíos iniciales
+        nuevaInspeccion.setRuta_foto(fotoBitmap != null ? "foto_" + System.currentTimeMillis() + ".jpg" : "");
+        nuevaInspeccion.setRuta_audio(!rutaAudio.isEmpty() ? new File(rutaAudio).getName() : "");
 
         ApiService apiService = ApiClient.getApiService();
 
-        // 1. Guardar los datos generales de la inspección
+        // 1. Enviar datos generales de la inspección
         Call<Void> callInspeccion = apiService.enviarInspeccion(nuevaInspeccion);
         callInspeccion.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(FormularioActivity.this, "¡Inspección guardada! Subiendo multimedia...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(FormularioActivity.this, "¡Inspección registrada con éxito!", Toast.LENGTH_SHORT).show();
 
-                    // Si llegaste aquí, se guardó en la BD de inspecciones.
-                    // Ahora puedes cerrar la actividad o agregar la lógica para subir los archivos si ya tienes los archivos locales listos.
+                    // Aquí puedes proceder a subir los archivos físicos a las carpetas de XAMPP usando los métodos Multipart de tu ApiService
+                    // (Opcionalmente puedes cerrar la actividad con finish())
                     finish();
                 } else {
                     Toast.makeText(FormularioActivity.this, "Error al guardar en el servidor", Toast.LENGTH_SHORT).show();

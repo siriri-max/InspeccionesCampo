@@ -189,9 +189,8 @@ public class FormularioActivity extends AppCompatActivity {
         nuevaInspeccion.setLatitud(latitud);
         nuevaInspeccion.setLongitud(longitud);
 
-        // Nombres temporales o vacíos iniciales
-        nuevaInspeccion.setRuta_foto(fotoBitmap != null ? "foto_" + System.currentTimeMillis() + ".jpg" : "");
-        nuevaInspeccion.setRuta_audio(!rutaAudio.isEmpty() ? new File(rutaAudio).getName() : "");
+        nuevaInspeccion.setRuta_foto(fotoBitmap != null ? "uploads/fotos/foto_" + System.currentTimeMillis() + ".jpg" : "");
+        nuevaInspeccion.setRuta_audio(!rutaAudio.isEmpty() ? "uploads/audios/" + new File(rutaAudio).getName() : "");
 
         ApiService apiService = ApiClient.getApiService();
 
@@ -203,8 +202,7 @@ public class FormularioActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     Toast.makeText(FormularioActivity.this, "¡Inspección registrada con éxito!", Toast.LENGTH_SHORT).show();
 
-                    // Aquí puedes proceder a subir los archivos físicos a las carpetas de XAMPP usando los métodos Multipart de tu ApiService
-                    // (Opcionalmente puedes cerrar la actividad con finish())
+
                     finish();
                 } else {
                     Toast.makeText(FormularioActivity.this, "Error al guardar en el servidor", Toast.LENGTH_SHORT).show();

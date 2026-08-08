@@ -1,13 +1,16 @@
 package com.ucenm.inspeccionescampo;
 
 import android.content.Intent;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
@@ -32,20 +35,65 @@ public class MainActivity extends AppCompatActivity {
         btnNuevaInspeccion = findViewById(R.id.btnNuevaInspeccion);
         listViewInspecciones = findViewById(R.id.listViewInspecciones);
 
-        // Inicializamos la interfaz de Retrofit
         apiService = ApiClient.getApiService();
 
-        // Abrir el formulario al hacer clic en el botón
         btnNuevaInspeccion.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, FormularioActivity.class);
             startActivity(intent);
+        });
+
+        // Menú de opciones multimedia al hacer clic en cualquier inspección de la lista
+        listViewInspecciones.setOnItemClickListener((parent, view, position, id) -> {
+            Inspeccion inspeccionSeleccionada = listaInspecciones.get(position);
+
+            CharSequence[] opciones = {"Ver Foto", "Reproducir Audio"};
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("Opciones de Inspección");
+            builder.setItems(opciones, (dialog, which) -> {
+                if (which == 0) {
+                    // Opción 0: Ver Foto
+                    String rutaFoto = inspeccionSeleccionada.getRuta_foto();
+                    if (rutaFoto != null && !rutaFoto.isEmpty() && !rutaFoto.equals("foto_pendiente.jpg")) {
+                        String urlFoto = "http://192.168.100.174/inspecciones_api/" + rutaFoto;
+
+                        Intent intent = new Intent(Intent.ACTION_VIEW);
+                        intent.setData(Uri.parse(urlFoto));
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(this, "Esta inspección no tiene una foto válida asociada", Toast.LENGTH_SHORT).show();
+                    }
+                } else if (which == 1) {
+                    // Opción 1: Reproducir Audio
+                    String rutaAudio = inspeccionSeleccionada.getRuta_audio();
+                    if (rutaAudio != null && !rutaAudio.isEmpty() && !rutaAudio.equals("audio_pendiente.3gp")) {
+                        String urlAudio = "http://192.168.100.174/inspecciones_api/uploads/audios/" + rutaAudio;
+
+                        try {
+                            MediaPlayer mediaPlayer = new MediaPlayer();
+                            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                            mediaPlayer.setDataSource(urlAudio);
+                            mediaPlayer.prepareAsync();
+                            mediaPlayer.setOnPreparedListener(mp -> {
+                                mp.start();
+                                Toast.makeText(this, "Reproduciendo audio del servidor...", Toast.LENGTH_SHORT).show();
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(this, "Error al reproducir el audio", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(this, "Esta inspección no tiene un audio válido asociado", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+            builder.show();
         });
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        // Cargar las inspecciones desde el servidor cada vez que volvamos a esta pantalla
         cargarInspeccionesRemotas();
     }
 
@@ -59,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
                     List<String> titulos = new ArrayList<>();
 
                     for (Inspeccion insp : listaInspecciones) {
-                        // Mostramos título, descripción y fecha que vienen de MySQL
                         titulos.add(insp.getTitulo() + "\n" + insp.getDescripcion() + "\nFecha: " + insp.getFechaInspeccion());
                     }
 

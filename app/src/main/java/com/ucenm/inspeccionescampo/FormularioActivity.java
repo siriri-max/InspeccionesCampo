@@ -179,26 +179,33 @@ public class FormularioActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("sesion", MODE_PRIVATE);
         int usuarioId = prefs.getInt("usuario_id", 1);
 
+        // Obtener la fecha y hora actual en formato MySQL (YYYY-MM-DD HH:MM:SS)
+        String fechaActual = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(new java.util.Date());
+
         Inspeccion nuevaInspeccion = new Inspeccion();
         nuevaInspeccion.setUsuarioId(usuarioId);
         nuevaInspeccion.setTitulo(titulo);
         nuevaInspeccion.setDescripcion(descripcion);
-
-        // Se agregan las rutas de foto y audio para que viajen hacia la API
-        nuevaInspeccion.setRuta_foto(fotoBitmap != null ? "foto_" + System.currentTimeMillis() + ".jpg" : "");
-        nuevaInspeccion.setRuta_audio(rutaAudio);
-
+        nuevaInspeccion.setFechaInspeccion(fechaActual);
         nuevaInspeccion.setLatitud(latitud);
         nuevaInspeccion.setLongitud(longitud);
 
-        ApiService apiService = ApiClient.getApiService();
-        Call<Void> call = apiService.enviarInspeccion(nuevaInspeccion);
+        // Nombres que se enviarán a la base de datos
+        String nombreFoto = fotoBitmap != null ? "foto_" + System.currentTimeMillis() + ".jpg" : "";
+        String nombreAudio = !rutaAudio.isEmpty() ? new File(rutaAudio).getName() : "";
 
-        call.enqueue(new Callback<Void>() {
+        nuevaInspeccion.setRuta_foto(nombreFoto);
+        nuevaInspeccion.setRuta_audio(nombreAudio);
+
+        ApiService apiService = ApiClient.getApiService();
+
+        // 1. PRIMERO ENVIAMOS LOS DATOS GENERALES A LA BD
+        Call<Void> callInspeccion = apiService.enviarInspeccion(nuevaInspeccion);
+        callInspeccion.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(FormularioActivity.this, "¡Inspección guardada en MySQL!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(FormularioActivity.this, "¡Inspección y archivos guardados con éxito!", Toast.LENGTH_LONG).show();
                     finish();
                 } else {
                     Toast.makeText(FormularioActivity.this, "Error al guardar en el servidor", Toast.LENGTH_SHORT).show();

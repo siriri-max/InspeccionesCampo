@@ -4,9 +4,9 @@ public class Inspeccion {
     private int usuarioId;
     private String titulo;
     private String descripcion;
-    private String FechaInspeccion; // <-- Agregado para que coincida con MySQL/PHP
-    private String rutaFoto;
-    private String rutaAudio;
+    private String FechaInspeccion;
+    private String ruta_foto;  // <-- Cambiado para coincidir con la BD/PHP
+    private String ruta_audio; // <-- Cambiado para coincidir con la BD/PHP
     private double latitud;
     private double longitud;
 
@@ -15,12 +15,12 @@ public class Inspeccion {
     }
 
     // 2. Constructor completo
-    public Inspeccion(String titulo, String descripcion, String FechaInspeccion, String rutaFoto, String rutaAudio, double latitud, double longitud) {
+    public Inspeccion(String titulo, String descripcion, String FechaInspeccion, String ruta_foto, String ruta_audio, double latitud, double longitud) {
         this.titulo = titulo;
         this.descripcion = descripcion;
         this.FechaInspeccion = FechaInspeccion;
-        this.rutaFoto = rutaFoto;
-        this.rutaAudio = rutaAudio;
+        this.ruta_foto = ruta_foto;
+        this.ruta_audio = ruta_audio;
         this.latitud = latitud;
         this.longitud = longitud;
     }
@@ -35,14 +35,14 @@ public class Inspeccion {
     public String getDescripcion() { return descripcion; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
-    public String getFechaInspeccion() { return FechaInspeccion; } // <-- El método que faltaba
+    public String getFechaInspeccion() { return FechaInspeccion; }
     public void setFechaInspeccion(String fechaInspeccion) { FechaInspeccion = fechaInspeccion; }
 
-    public String getRutaFoto() { return rutaFoto; }
-    public void setRutaFoto(String rutaFoto) { this.rutaFoto = rutaFoto; }
+    public String getRuta_foto() { return ruta_foto; }
+    public void setRuta_foto(String ruta_foto) { this.ruta_foto = ruta_foto; }
 
-    public String getRutaAudio() { return rutaAudio; }
-    public void setRutaAudio(String rutaAudio) { this.rutaAudio = rutaAudio; }
+    public String getRuta_audio() { return ruta_audio; }
+    public void setRuta_audio(String ruta_audio) { this.ruta_audio = ruta_audio; }
 
     public double getLatitud() { return latitud; }
     public void setLatitud(double latitud) { this.latitud = latitud; }

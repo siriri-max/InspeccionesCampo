@@ -5,8 +5,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
 
-    // Coloca tu IP local (IPv4) obtenida con ipconfig
-    private static final String BASE_URL = "http:// 192.168.1.44/crud-php/";
+    // Asegúrate de que esta URL sea la correcta y sin espacios en blanco
+    private static final String BASE_URL = "http://192.168.100.174/inspecciones_api/";
     private static Retrofit retrofit = null;
 
     public static ApiService getApiService() {

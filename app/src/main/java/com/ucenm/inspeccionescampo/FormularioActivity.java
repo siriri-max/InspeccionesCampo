@@ -183,6 +183,11 @@ public class FormularioActivity extends AppCompatActivity {
         nuevaInspeccion.setUsuarioId(usuarioId);
         nuevaInspeccion.setTitulo(titulo);
         nuevaInspeccion.setDescripcion(descripcion);
+
+        // Se agregan las rutas de foto y audio para que viajen hacia la API
+        nuevaInspeccion.setRuta_foto(fotoBitmap != null ? "foto_" + System.currentTimeMillis() + ".jpg" : "");
+        nuevaInspeccion.setRuta_audio(rutaAudio);
+
         nuevaInspeccion.setLatitud(latitud);
         nuevaInspeccion.setLongitud(longitud);
 

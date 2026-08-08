@@ -77,7 +77,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 double lat = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_LATITUD));
                 double lng = cursor.getDouble(cursor.getColumnIndexOrThrow(COLUMN_LONGITUD));
 
-                lista.add(new Inspeccion(titulo, descripcion, foto, audio, lat, lng));
+                // Usamos el constructor vacío y los setters para evitar conflictos de parámetros
+                Inspeccion insp = new Inspeccion();
+                insp.setTitulo(titulo);
+                insp.setDescripcion(descripcion);
+                insp.setRutaFoto(foto);
+                insp.setRutaAudio(audio);
+                insp.setLatitud(lat);
+                insp.setLongitud(lng);
+
+                lista.add(insp);
             } while (cursor.moveToNext());
         }
         cursor.close();

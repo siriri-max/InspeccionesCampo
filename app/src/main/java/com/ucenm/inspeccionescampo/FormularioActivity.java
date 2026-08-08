@@ -26,7 +26,6 @@ import com.google.android.gms.location.LocationServices;
 import java.io.File;
 import java.io.IOException;
 
-import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -187,12 +186,12 @@ public class FormularioActivity extends AppCompatActivity {
         nuevaInspeccion.setLatitud(latitud);
         nuevaInspeccion.setLongitud(longitud);
 
-        ApiService apiService = ApiClient.getClient().create(ApiService.class);
-        Call<ResponseBody> call = apiService.crearInspeccion(nuevaInspeccion);
+        ApiService apiService = ApiClient.getApiService();
+        Call<Void> call = apiService.enviarInspeccion(nuevaInspeccion);
 
-        call.enqueue(new Callback<ResponseBody>() {
+        call.enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+            public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
                     Toast.makeText(FormularioActivity.this, "¡Inspección guardada en MySQL!", Toast.LENGTH_LONG).show();
                     finish();
@@ -202,7 +201,7 @@ public class FormularioActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<ResponseBody> call, Throwable t) {
+            public void onFailure(Call<Void> call, Throwable t) {
                 Toast.makeText(FormularioActivity.this, "Fallo de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });

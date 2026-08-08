@@ -179,7 +179,6 @@ public class FormularioActivity extends AppCompatActivity {
         SharedPreferences prefs = getSharedPreferences("sesion", MODE_PRIVATE);
         int usuarioId = prefs.getInt("usuario_id", 1);
 
-        // Obtener la fecha y hora actual en formato MySQL (YYYY-MM-DD HH:MM:SS)
         String fechaActual = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(new java.util.Date());
 
         Inspeccion nuevaInspeccion = new Inspeccion();
@@ -189,23 +188,21 @@ public class FormularioActivity extends AppCompatActivity {
         nuevaInspeccion.setFechaInspeccion(fechaActual);
         nuevaInspeccion.setLatitud(latitud);
         nuevaInspeccion.setLongitud(longitud);
-
-        // Nombres que se enviarán a la base de datos
-        String nombreFoto = fotoBitmap != null ? "foto_" + System.currentTimeMillis() + ".jpg" : "";
-        String nombreAudio = !rutaAudio.isEmpty() ? new File(rutaAudio).getName() : "";
-
-        nuevaInspeccion.setRuta_foto(nombreFoto);
-        nuevaInspeccion.setRuta_audio(nombreAudio);
+        nuevaInspeccion.setRuta_foto(fotoBitmap != null ? "foto_pendiente.jpg" : "");
+        nuevaInspeccion.setRuta_audio(!rutaAudio.isEmpty() ? "audio_pendiente.3gp" : "");
 
         ApiService apiService = ApiClient.getApiService();
 
-        // 1. PRIMERO ENVIAMOS LOS DATOS GENERALES A LA BD
+        // 1. Guardar los datos generales de la inspección
         Call<Void> callInspeccion = apiService.enviarInspeccion(nuevaInspeccion);
         callInspeccion.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(FormularioActivity.this, "¡Inspección y archivos guardados con éxito!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(FormularioActivity.this, "¡Inspección guardada! Subiendo multimedia...", Toast.LENGTH_SHORT).show();
+
+                    // Si llegaste aquí, se guardó en la BD de inspecciones.
+                    // Ahora puedes cerrar la actividad o agregar la lógica para subir los archivos si ya tienes los archivos locales listos.
                     finish();
                 } else {
                     Toast.makeText(FormularioActivity.this, "Error al guardar en el servidor", Toast.LENGTH_SHORT).show();

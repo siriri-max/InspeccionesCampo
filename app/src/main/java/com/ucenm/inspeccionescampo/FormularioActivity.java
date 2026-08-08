@@ -114,13 +114,17 @@ public class FormularioActivity extends AppCompatActivity {
     }
 
     private void iniciarGrabacion() {
-        File fileAudio = new File(getExternalCacheDir(), "audio_inspeccion_" + System.currentTimeMillis() + ".3gp");
+        // Cambiado a .m4a para compatibilidad moderna
+        File fileAudio = new File(getExternalCacheDir(), "audio_inspeccion_" + System.currentTimeMillis() + ".m4a");
         rutaAudio = fileAudio.getAbsolutePath();
 
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        // Formato MPEG_4 y codificador AAC
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+
         mediaRecorder.setOutputFile(rutaAudio);
 
         try {
@@ -251,7 +255,8 @@ public class FormularioActivity extends AppCompatActivity {
         File file = new File(rutaAudio);
         if (!file.exists()) return;
 
-        okhttp3.RequestBody requestFile = okhttp3.RequestBody.create(okhttp3.MediaType.parse("audio/3gpp"), file);
+        // Aquí es donde actualizas la línea del MediaType a "audio/mp4"
+        okhttp3.RequestBody requestFile = okhttp3.RequestBody.create(okhttp3.MediaType.parse("audio/mp4"), file);
         okhttp3.MultipartBody.Part bodyAudio = okhttp3.MultipartBody.Part.createFormData("audio", file.getName(), requestFile);
         okhttp3.RequestBody idBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("text/plain"), "16");
 

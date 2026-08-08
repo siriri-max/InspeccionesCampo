@@ -147,7 +147,6 @@ public class FormularioActivity extends AppCompatActivity {
 
     private void obtenerUbicacionGPS() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
             Toast.makeText(this, "Obteniendo coordenadas...", Toast.LENGTH_SHORT).show();
 
             fusedLocationClient.getCurrentLocation(
@@ -189,12 +188,11 @@ public class FormularioActivity extends AppCompatActivity {
         nuevaInspeccion.setLatitud(latitud);
         nuevaInspeccion.setLongitud(longitud);
 
-        nuevaInspeccion.setRuta_foto(fotoBitmap != null ? "uploads/fotos/foto_" + System.currentTimeMillis() + ".jpg" : "");
-        nuevaInspeccion.setRuta_audio(!rutaAudio.isEmpty() ? "uploads/audios/" + new File(rutaAudio).getName() : "");
+        nuevaInspeccion.setRuta_foto("");
+        nuevaInspeccion.setRuta_audio("");
 
         ApiService apiService = ApiClient.getApiService();
 
-        // 1. Enviar datos generales de la inspección
         Call<Void> callInspeccion = apiService.enviarInspeccion(nuevaInspeccion);
         callInspeccion.enqueue(new Callback<Void>() {
             @Override
@@ -202,6 +200,13 @@ public class FormularioActivity extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     Toast.makeText(FormularioActivity.this, "¡Inspección registrada con éxito!", Toast.LENGTH_SHORT).show();
 
+                    if (fotoBitmap != null) {
+                        subirFotoServidor(apiService);
+                    }
+
+                    if (!rutaAudio.isEmpty()) {
+                        subirAudioServidor(apiService);
+                    }
 
                     finish();
                 } else {
@@ -213,6 +218,50 @@ public class FormularioActivity extends AppCompatActivity {
             public void onFailure(Call<Void> call, Throwable t) {
                 Toast.makeText(FormularioActivity.this, "Fallo de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
+        });
+    }
+
+    private void subirFotoServidor(ApiService apiService) {
+        try {
+            File file = new File(getExternalCacheDir(), "foto_temp.jpg");
+            java.io.FileOutputStream fos = new java.io.FileOutputStream(file);
+            fotoBitmap.compress(Bitmap.CompressFormat.JPEG, 90, fos);
+            fos.flush();
+            fos.close();
+
+            okhttp3.RequestBody requestFile = okhttp3.RequestBody.create(okhttp3.MediaType.parse("image/*"), file);
+            okhttp3.MultipartBody.Part bodyFoto = okhttp3.MultipartBody.Part.createFormData("foto", file.getName(), requestFile);
+
+            okhttp3.RequestBody idBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("text/plain"), "16");
+
+            Call<RespuestaServidor> call = apiService.subirFoto(bodyFoto, idBody);
+            call.enqueue(new Callback<RespuestaServidor>() {
+                @Override
+                public void onResponse(Call<RespuestaServidor> call, Response<RespuestaServidor> response) {}
+
+                @Override
+                public void onFailure(Call<RespuestaServidor> call, Throwable t) {}
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void subirAudioServidor(ApiService apiService) {
+        File file = new File(rutaAudio);
+        if (!file.exists()) return;
+
+        okhttp3.RequestBody requestFile = okhttp3.RequestBody.create(okhttp3.MediaType.parse("audio/3gpp"), file);
+        okhttp3.MultipartBody.Part bodyAudio = okhttp3.MultipartBody.Part.createFormData("audio", file.getName(), requestFile);
+        okhttp3.RequestBody idBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("text/plain"), "16");
+
+        Call<RespuestaServidor> call = apiService.subirAudio(bodyAudio, idBody);
+        call.enqueue(new Callback<RespuestaServidor>() {
+            @Override
+            public void onResponse(Call<RespuestaServidor> call, Response<RespuestaServidor> response) {}
+
+            @Override
+            public void onFailure(Call<RespuestaServidor> call, Throwable t) {}
         });
     }
 

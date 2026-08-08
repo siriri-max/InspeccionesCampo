@@ -1,22 +1,24 @@
 package com.ucenm.inspeccionescampo;
 
 public class Inspeccion {
-    private int usuarioId; // Nuevo campo agregado
+    private int usuarioId;
     private String titulo;
     private String descripcion;
+    private String FechaInspeccion; // <-- Agregado para que coincida con MySQL/PHP
     private String rutaFoto;
     private String rutaAudio;
     private double latitud;
     private double longitud;
 
-    // 1. Constructor vacío (NECESARIO para usar new Inspeccion())
+    // 1. Constructor vacío
     public Inspeccion() {
     }
 
     // 2. Constructor completo
-    public Inspeccion(String titulo, String descripcion, String rutaFoto, String rutaAudio, double latitud, double longitud) {
+    public Inspeccion(String titulo, String descripcion, String FechaInspeccion, String rutaFoto, String rutaAudio, double latitud, double longitud) {
         this.titulo = titulo;
         this.descripcion = descripcion;
+        this.FechaInspeccion = FechaInspeccion;
         this.rutaFoto = rutaFoto;
         this.rutaAudio = rutaAudio;
         this.latitud = latitud;
@@ -32,6 +34,9 @@ public class Inspeccion {
 
     public String getDescripcion() { return descripcion; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+
+    public String getFechaInspeccion() { return FechaInspeccion; } // <-- El método que faltaba
+    public void setFechaInspeccion(String fechaInspeccion) { FechaInspeccion = fechaInspeccion; }
 
     public String getRutaFoto() { return rutaFoto; }
     public void setRutaFoto(String rutaFoto) { this.rutaFoto = rutaFoto; }

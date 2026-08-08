@@ -9,7 +9,7 @@ import retrofit2.http.POST;
 public interface ApiService {
 
     // Llama a PostPersons.php para enviar/guardar una inspección
-    @POST("PostPersons.php")
+    @POST("inspecciones.php")
     Call<Void> enviarInspeccion(@Body Inspeccion inspeccion);
 
     // Llama a GetPersons.php para obtener la lista desde MySQL

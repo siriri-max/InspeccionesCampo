@@ -114,17 +114,13 @@ public class FormularioActivity extends AppCompatActivity {
     }
 
     private void iniciarGrabacion() {
-        // Cambiado a .m4a para compatibilidad moderna
         File fileAudio = new File(getExternalCacheDir(), "audio_inspeccion_" + System.currentTimeMillis() + ".m4a");
         rutaAudio = fileAudio.getAbsolutePath();
 
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-
-        // Formato MPEG_4 y codificador AAC
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
-
         mediaRecorder.setOutputFile(rutaAudio);
 
         try {
@@ -191,25 +187,28 @@ public class FormularioActivity extends AppCompatActivity {
         nuevaInspeccion.setFechaInspeccion(fechaActual);
         nuevaInspeccion.setLatitud(latitud);
         nuevaInspeccion.setLongitud(longitud);
-
         nuevaInspeccion.setRuta_foto("");
         nuevaInspeccion.setRuta_audio("");
 
         ApiService apiService = ApiClient.getApiService();
 
-        Call<Void> callInspeccion = apiService.enviarInspeccion(nuevaInspeccion);
-        callInspeccion.enqueue(new Callback<Void>() {
+        // Ahora esperamos RespuestaServidor para capturar el ID real devuelto por PHP
+        Call<RespuestaServidor> callInspeccion = apiService.enviarInspeccion(nuevaInspeccion);
+        callInspeccion.enqueue(new Callback<RespuestaServidor>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                if (response.isSuccessful()) {
+            public void onResponse(Call<RespuestaServidor> call, Response<RespuestaServidor> response) {
+                if (response.isSuccessful() && response.body() != null) {
                     Toast.makeText(FormularioActivity.this, "¡Inspección registrada con éxito!", Toast.LENGTH_SHORT).show();
 
+                    // Obtenemos el ID real generado en MySQL (ej: 25, 26...)
+                    String idReal = String.valueOf(response.body().getId());
+
                     if (fotoBitmap != null) {
-                        subirFotoServidor(apiService);
+                        subirFotoServidor(apiService, idReal);
                     }
 
                     if (!rutaAudio.isEmpty()) {
-                        subirAudioServidor(apiService);
+                        subirAudioServidor(apiService, idReal);
                     }
 
                     finish();
@@ -219,13 +218,13 @@ public class FormularioActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(Call<RespuestaServidor> call, Throwable t) {
                 Toast.makeText(FormularioActivity.this, "Fallo de red: " + t.getMessage(), Toast.LENGTH_LONG).show();
             }
         });
     }
 
-    private void subirFotoServidor(ApiService apiService) {
+    private void subirFotoServidor(ApiService apiService, String idInspeccion) {
         try {
             File file = new File(getExternalCacheDir(), "foto_temp.jpg");
             java.io.FileOutputStream fos = new java.io.FileOutputStream(file);
@@ -236,7 +235,8 @@ public class FormularioActivity extends AppCompatActivity {
             okhttp3.RequestBody requestFile = okhttp3.RequestBody.create(okhttp3.MediaType.parse("image/*"), file);
             okhttp3.MultipartBody.Part bodyFoto = okhttp3.MultipartBody.Part.createFormData("foto", file.getName(), requestFile);
 
-            okhttp3.RequestBody idBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("text/plain"), "16");
+            // Usamos el ID real de la inspección
+            okhttp3.RequestBody idBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("text/plain"), idInspeccion);
 
             Call<RespuestaServidor> call = apiService.subirFoto(bodyFoto, idBody);
             call.enqueue(new Callback<RespuestaServidor>() {
@@ -251,14 +251,15 @@ public class FormularioActivity extends AppCompatActivity {
         }
     }
 
-    private void subirAudioServidor(ApiService apiService) {
+    private void subirAudioServidor(ApiService apiService, String idInspeccion) {
         File file = new File(rutaAudio);
         if (!file.exists()) return;
 
-        // Aquí es donde actualizas la línea del MediaType a "audio/mp4"
         okhttp3.RequestBody requestFile = okhttp3.RequestBody.create(okhttp3.MediaType.parse("audio/mp4"), file);
         okhttp3.MultipartBody.Part bodyAudio = okhttp3.MultipartBody.Part.createFormData("audio", file.getName(), requestFile);
-        okhttp3.RequestBody idBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("text/plain"), "16");
+
+        // Usamos el ID real de la inspección
+        okhttp3.RequestBody idBody = okhttp3.RequestBody.create(okhttp3.MediaType.parse("text/plain"), idInspeccion);
 
         Call<RespuestaServidor> call = apiService.subirAudio(bodyAudio, idBody);
         call.enqueue(new Callback<RespuestaServidor>() {

@@ -12,12 +12,12 @@ import retrofit2.http.Part;
 
 public interface ApiService {
 
-    // 1. Enviar los datos generales de la inspección a inspecciones.php
+    // 1. Enviar los datos generales y recibir la respuesta con el ID real
     @POST("inspecciones.php")
-    Call<Void> enviarInspeccion(@Body Inspeccion inspeccion);
+    Call<RespuestaServidor> enviarInspeccion(@Body Inspeccion inspeccion);
 
     // 2. Obtener la lista de inspecciones desde MySQL
-    @GET("GetPersons.php") // (O cámbialo a "inspecciones.php" si usas el mismo archivo para el GET)
+    @GET("inspecciones.php")
     Call<List<Inspeccion>> obtenerInspecciones();
 
     // 3. Subir la FOTO al servidor PHP con su ID de inspección
